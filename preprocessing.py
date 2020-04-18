@@ -7,7 +7,7 @@ def read_data(filename = 'DATOS_DE_CALIDAD_DEL_AIRE_EN_COLOMBIA_2011-2017.csv'):
     print('> Reading data...')
     t0 = time.time()
     datos = pd.read_csv(filename, usecols = ['Fecha','Latitud','Longitud','Variable', 'Concentración', 'Unidades', 'Nombre de la estación', 'Tiempo de exposición'])
-    print('Read data in '+str(np.around(time.time()-t0, decimals = 3))+ ' seconds')
+    print('> Read data in '+str(np.around(time.time()-t0, decimals = 3))+ ' seconds')
     #Filtra datos para quedarse solo con datos diarios
     datos = datos.loc[datos['Tiempo de exposición'] == 24]
 
@@ -36,7 +36,7 @@ def df_variable(datos, key = 'PM10'):
     df.sort_index(inplace=True)
     df = df.reindex(new_idx)
     df.rename(columns = {'Concentración':'Concentracion'})
-
+    df.Concentracion = df.groupby(level=0).Concentracion.bfill().fillna(0)
     return df
 
 data = read_data()
