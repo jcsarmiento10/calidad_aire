@@ -35,9 +35,9 @@ def df_variable(datos, key = 'PM10'):
     df.set_index(keys=['Nombre de la estación', 'Fecha'], inplace=True)
     df.sort_index(inplace=True)
     df = df.reindex(new_idx)
-    df.rename(columns = {'Concentración':'Concentracion'})
-    df.Concentracion = df.groupby(level=0).Concentracion.bfill().fillna(0)
-    return df
+    #df['Concentración'] = df.groupby(level=0)['Concentración'].bfill().fillna(0)
+    df = df.groupby(level=0).bfill().fillna(0)
+    return df   
 
-data = read_data()
-df_variable = df_variable(data)
+#data = read_data()
+#df_variable = df_variable(data)

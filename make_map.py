@@ -4,10 +4,13 @@
 import pandas as pd
 import folium
 from folium.plugins import TimestampedGeoJson
+import preprocessing as pre
+from bokeh.palettes import RdYlBu
+from tqdm import tqdm
 
 def create_geojson_features(df):
     features = []
-    for _, row in df.iterrows():
+    for _, row in tqdm(df.iterrows()):
         feature = {
             'type': 'Feature',
             'geometry': {
@@ -15,36 +18,39 @@ def create_geojson_features(df):
                 'coordinates':[row['Longitud'],row['Latitud']]
             },
             'properties': {
-                'time': row['DatetimeBegin'].date().__str__(),
-                'style': {'color' : row['color']}, # revisar que usar
+                'time': row['Fecha'].date().__str__(),
+                'style': {'color' : row['color']},
                 'icon': 'circle',
                 'iconstyle':{
                     'fillColor': row['color'],
                     'fillOpacity': 0.8,
                     'stroke': 'true',
-                    'radius': 7
+                    'radius': 5
                 }
             }
         }
         features.append(feature)
     return features
 
+data = pre.read_data()
 
-df = pd.read_csv('data.csv')
-# esperar que hace santi para diferenciar IDs
-variables = []
-
-# revisar location y tipo de mapa
-basemap = folium.Map(location=[37.43, -122.17], zoom_start=6, tiles="Stamen Terrain") 
+variables = data['Variable'].unique().tolist()[:2] # Probando solo con dos
+basemap = folium.Map(location=[4.71, -74.07], zoom_start=6, tiles="Stamen Terrain") # revisar tiles
 
 for var in variables:
-    df_filtered = filter(df, var) # not real
-    geo_features = create_geojson_features(df_filtered)
-    TimestampedGeoJson({'type': 'FeatureCollection', 'features': geo_features}, period='P1M', #revisar P1M
-                       add_last_point=True, auto_play=False, loop=False, max_speed=1, 
-                       loop_button=True, date_options='YYYY/MM', duration='P1M',
-                       time_slider_drag_update=True).add_to(basemap)
+    print(var)
+    df_variable = pre.df_variable(data, var)
+    # add color column    
+    df_variable['color'] = [RdYlBu[11][val] for val in pd.cut(x=df_variable['Concentración'], 
+                                                              bins=11, labels=False)]
+    
+    
+    geo_features = create_geojson_features(df_variable.reset_index())
+    basemap.add_child(TimestampedGeoJson({'type': 'FeatureCollection', 'features': geo_features}, 
+                                    period='P1D', add_last_point=True, auto_play=False, loop=False, 
+                                    max_speed=10, loop_button=True, date_options='YYYY/MM', 
+                                    duration='P1M', time_slider_drag_update=True))
     
 basemap.add_child(folium.LayerControl())
 
-basemap.save("Map1.html")
+basemap.save("Map2.html")
