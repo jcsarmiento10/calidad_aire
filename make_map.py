@@ -32,25 +32,30 @@ def create_geojson_features(df):
         features.append(feature)
     return features
 
-data = pre.read_data()
+def get_data():
 
-variables = data['Variable'].unique().tolist()[:2] # Probando solo con dos
-basemap = folium.Map(location=[4.71, -74.07], zoom_start=6, tiles="Stamen Terrain") # revisar tiles
+    data = pre.read_data()
 
-for var in variables:
-    print(var)
-    df_variable = pre.df_variable(data, var)
-    # add color column    
-    df_variable['color'] = [RdYlBu[11][val] for val in pd.cut(x=df_variable['Concentración'], 
-                                                              bins=11, labels=False)]
-    
-    
-    geo_features = create_geojson_features(df_variable.reset_index())
-    basemap.add_child(TimestampedGeoJson({'type': 'FeatureCollection', 'features': geo_features}, 
-                                    period='P1D', add_last_point=True, auto_play=False, loop=False, 
-                                    max_speed=10, loop_button=True, date_options='YYYY/MM', 
-                                    duration='P1M', time_slider_drag_update=True))
-    
-basemap.add_child(folium.LayerControl())
+    variables = data['Variable'].unique().tolist()[:5] # Probando solo con 5
+    maps_data = {}
 
-basemap.save("Map2.html")
+    for var in variables:
+        print(var)
+        df_variable = pre.df_variable(data, var)
+        # add color column    
+        df_variable['color'] = [RdYlBu[11][val] for val in pd.cut(x=df_variable['Concentración'], 
+                                                                bins=11, labels=False)]
+        
+        geo_features = create_geojson_features(df_variable.reset_index())
+        maps_data[var] = TimestampedGeoJson({'type': 'FeatureCollection', 'features': geo_features}, 
+                                        period='P1D', add_last_point=True, auto_play=False, loop=False, 
+                                        max_speed=10, loop_button=True, date_options='YYYY/MM', 
+                                        duration='P1D', time_slider_drag_update=True)
+    return maps_data, variables
+    
+def save_map(geojson):
+    
+    basemap = folium.Map(location=[5, -74.07], zoom_start=6, tiles="Stamen Terrain") # revisar tiles
+    basemap.add_child(geojson)
+    basemap.add_child(folium.LayerControl())
+    basemap.save("templates/Map.html")

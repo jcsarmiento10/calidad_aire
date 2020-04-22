@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Calidad Aire Colombia</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-around align-items-center">
+            <h1>Mapa para {{current | safe}}</h1> 
+        </div>  
+        <div class="row justify-content-around align-items-center">
+            <h3>Escoja variable para gráfica: </h3>
+        </div>
+        <div class="row justify-content-around align-items-center mb-4">
+            <form action="/" method="post">
+                <select name="id" id="variable">
+                    {% for var in variables %}
+                        {% if var == current %}
+                            <option value={{var}} selected>{{var | safe}}</option>
+                        {% else %}
+                        <option value={{var}}>{{var | safe}}</option>
+                        {% endif%}
+                    {% endfor %}
+                </select>
+            </form>     
+        </div>
+        <div class="row justify-content-around align-items-center">
+            <!-- <object type="text/html" data="Map.html"></object> -->
+            <iframe src='/map/'  width="1200" height="650" style="float:center"></iframe>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+
+    jQuery(function() {
+      jQuery('#variable').change(function() {
+          this.form.submit();
+      });
+  });
+  </script>
+</html>
+
