@@ -22,4 +22,5 @@ def map_display():
   return render_template('Map.html')
 
 if __name__=="__main__":
+    # carga los dos datos 2 veces. Creo que es por el 'lazy_loading' corre el script la primera vez y después cuando de verdad se carga el app.
     app.run(debug=True, port=8080)
